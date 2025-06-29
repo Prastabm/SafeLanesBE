@@ -34,4 +34,41 @@ public class PolylineDecoder {
         }
         return coordinates;
     }
+
+    // New method: decode and interpolate points every stepMeters
+    public static List<Coordinate> decodeWithInterpolation(String polyline, double stepMeters) {
+        List<Coordinate> decoded = decode(polyline);
+        List<Coordinate> result = new ArrayList<>();
+        if (decoded.isEmpty()) return result;
+
+        for (int i = 0; i < decoded.size() - 1; i++) {
+            Coordinate start = decoded.get(i);
+            Coordinate end = decoded.get(i + 1);
+            result.add(start);
+
+            double distance = haversine(start.getLat(), start.getLon(), end.getLat(), end.getLon());
+            int steps = (int) (distance / stepMeters);
+
+            for (int s = 1; s < steps; s++) {
+                double fraction = (double) s / steps;
+                double lat = start.getLat() + (end.getLat() - start.getLat()) * fraction;
+                double lon = start.getLon() + (end.getLon() - start.getLon()) * fraction;
+                result.add(new Coordinate(lat, lon));
+            }
+        }
+        result.add(decoded.get(decoded.size() - 1));
+        return result;
+    }
+
+    // Haversine formula in meters
+    private static double haversine(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371000;
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
 }
