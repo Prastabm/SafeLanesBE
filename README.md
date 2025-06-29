@@ -48,9 +48,9 @@
 - [x] H3 Clustering for Crime Hotspots
 - [x] Model Training for Coordinate Safety Scores (XGBOOST)
 - [ ] Kafka Message Streaming Setup Between SpringBoot and Flask Service
-- [ ] GMaps API setup with billing
-- [ ] Springboot endpoint creation
-- [ ] A* model building and setup for safe path recommendation
+- [x] GMaps API setup with billing
+- [x] Springboot endpoint creation
+- [x] A* model building and setup for safe path recommendation
 - [ ] Setting up the auth server and api gateway
 - [ ] Setting up Redis caching for reduced API calls
 - [ ] Running the entire application in a Docker environment
