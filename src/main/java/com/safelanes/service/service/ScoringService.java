@@ -9,7 +9,7 @@ import java.util.*;
 
 @Service
 public class ScoringService {
-    private static final String SCORING_URL = "http://127.0.0.1:8000/api/v1/score";
+    private static final String SCORING_URL = "http://host.docker.internal:8000/api/v1/score";
 
     public List<List<ScoredCoordinate>> scorePaths(List<PathResponse> paths) {
         System.out.println(paths);
