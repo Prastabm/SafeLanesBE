@@ -50,10 +50,9 @@
 - [ ] Kafka Message Streaming Setup Between SpringBoot and Flask Service
 - [x] GMaps API setup with billing
 - [x] Springboot endpoint creation
-- [x] A* model building and setup for safe path recommendation
 - [ ] Setting up the auth server and api gateway
 - [ ] Setting up Redis caching for reduced API calls
-- [ ] Running the entire application in a Docker environment
+- [x] Running the entire application in a Docker environment
 - [ ] testing functionalities
 # Screenshots of Progress
 > **_1. Hotspot Clusters Across City Of Boston_**
