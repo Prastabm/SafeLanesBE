@@ -12,6 +12,7 @@ public class ScoringService {
     private static final String SCORING_URL = "http://127.0.0.1:8000/api/v1/score";
 
     public List<List<ScoredCoordinate>> scorePaths(List<PathResponse> paths) {
+        System.out.println(paths);
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

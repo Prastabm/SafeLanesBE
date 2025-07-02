@@ -21,8 +21,12 @@ public class ServiceController {
 
     @GetMapping("/walking-path")
     public List<ScoredCoordinate> getWalkingPaths(@RequestParam String source, @RequestParam String destination) {
+        System.out.println(source);
+        System.out.println(destination);
         Coordinate srcCoord = geocodingService.geocode(source);
+        System.out.println(srcCoord);
         Coordinate destCoord = geocodingService.geocode(destination);
+        System.out.println(destCoord);
         return directionsService.getWalkingPath(srcCoord, destCoord);
     }
 }

@@ -3,17 +3,16 @@ package com.safelanes.service.service;
 import com.safelanes.service.dto.ScoredCoordinate;
 import org.springframework.stereotype.Service;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class SafePathService {
 
-    public static class Node {
-        public double lat, lon, score;
-        public double totalScore = Double.NEGATIVE_INFINITY;
-        public Node parent;
+    static class Node {
+        double lat, lon, score;
+        double totalScore = Double.NEGATIVE_INFINITY;
+        Node parent;
 
-        public Node(double lat, double lon, double score) {
+        Node(double lat, double lon, double score) {
             this.lat = lat;
             this.lon = lon;
             this.score = score;
@@ -48,52 +47,33 @@ public class SafePathService {
         return neighbors;
     }
 
-    public List<ScoredCoordinate> findSafestPath(List<List<ScoredCoordinate>> scoredNodes) {
-        // Flatten the list of lists
-        List<Node> allNodes = new ArrayList<>();
-        for (List<ScoredCoordinate> path : scoredNodes) {
-            for (ScoredCoordinate sc : path) {
-                allNodes.add(new Node(sc.getLat(), sc.getLon(), sc.getScore()));
-            }
-        }
-        System.out.println("All nodes:");
-        for (Node n : allNodes) {
-            System.out.printf("Node(lat=%.5f, lon=%.5f, score=%.2f)%n", n.lat, n.lon, n.score);
-        }
-        if (allNodes.isEmpty()) {
-            System.out.println("No nodes found, returning empty path.");
-            return Collections.emptyList();
-        }
-        Node start = allNodes.get(0);
-        Node end = allNodes.get(allNodes.size() - 1);
-        System.out.printf("Start node: (lat=%.5f, lon=%.5f)%n", start.lat, start.lon);
-        System.out.printf("End node: (lat=%.5f, lon=%.5f)%n", end.lat, end.lon);
-
-
-        // Pathfinding
+    private List<Node> safestPath(Node start, Node end, List<Node> allNodes) {
         for (Node n : allNodes) {
             n.totalScore = Double.NEGATIVE_INFINITY;
             n.parent = null;
         }
+
         PriorityQueue<Node> queue = new PriorityQueue<>(Comparator.comparingDouble(n -> -n.totalScore));
         Set<Node> processed = new HashSet<>();
+
         start.totalScore = start.score;
         queue.add(start);
 
         while (!queue.isEmpty()) {
             Node current = queue.poll();
+
             if (processed.contains(current)) continue;
             processed.add(current);
-            System.out.printf("Processing node: (lat=%.5f, lon=%.5f, totalScore=%.2f)%n", current.lat, current.lon, current.totalScore);
+
             if (current.equals(end)) {
-                System.out.println("End node reached, reconstructing path.");
-                return toScoredCoordinates(reconstructPath(current));
+                return reconstructPath(current);
             }
+
             List<Node> neighbors = getNeighbors(current, allNodes);
-            System.out.printf("Neighbors found for (lat=%.5f, lon=%.5f): %s%n", current.lat, current.lon,
-                    neighbors.stream().map(n -> String.format("(%.5f,%.5f)", n.lat, n.lon)).collect(Collectors.toList()));
+
             for (Node neighbor : neighbors) {
                 if (processed.contains(neighbor)) continue;
+
                 double newScore = current.totalScore + neighbor.score;
                 if (newScore > neighbor.totalScore) {
                     neighbor.totalScore = newScore;
@@ -102,7 +82,6 @@ public class SafePathService {
                 }
             }
         }
-        System.out.println("No path found, returning empty list.");
         return Collections.emptyList();
     }
 
@@ -126,4 +105,39 @@ public class SafePathService {
         }
         return result;
     }
+
+    public List<ScoredCoordinate> findSafestPath(List<List<ScoredCoordinate>> scoredPaths) {
+        if (scoredPaths == null || scoredPaths.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<ScoredCoordinate> safest = null;
+        double bestScore = Double.NEGATIVE_INFINITY;
+        int safestPathIndex = -1;
+
+        for (int i = 0; i < scoredPaths.size(); i++) {
+            List<ScoredCoordinate> path = scoredPaths.get(i);
+            if (path.isEmpty()) continue;
+
+            double total = 0;
+            for (ScoredCoordinate sc : path) {
+                total += sc.getScore();
+            }
+            double average = total / path.size();
+
+            if (average > bestScore) {
+                bestScore = average;
+                safest = path;
+                safestPathIndex = i;
+            }
+        }
+
+        if (safestPathIndex != -1) {
+            System.out.println("Path " + (safestPathIndex + 1) + " is the safest route with average score: " +
+                    String.format("%.2f", bestScore));
+        }
+
+        return safest != null ? safest : Collections.emptyList();
+    }
+
 }

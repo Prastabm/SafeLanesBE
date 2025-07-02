@@ -1,74 +1,84 @@
 package com.safelanes.service.service;
 
+import com.google.maps.internal.PolylineEncoding;
+import com.google.maps.model.LatLng;
 import com.safelanes.service.dto.Coordinate;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PolylineDecoder {
+
+    /**
+     * Decodes polyline using Google's polylineencoder library.
+     */
     public static List<Coordinate> decode(String polyline) {
+        List<LatLng> decodedPoints = PolylineEncoding.decode(polyline);
         List<Coordinate> coordinates = new ArrayList<>();
-        int index = 0, len = polyline.length();
-        int lat = 0, lng = 0;
 
-        while (index < len) {
-            int b, shift = 0, result = 0;
-            do {
-                b = polyline.charAt(index++) - 63;
-                result |= (b & 0x1f) << shift;
-                shift += 5;
-            } while (b >= 0x20);
-            int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-            lat += dlat;
-
-            shift = 0;
-            result = 0;
-            do {
-                b = polyline.charAt(index++) - 63;
-                result |= (b & 0x1f) << shift;
-                shift += 5;
-            } while (b >= 0x20);
-            int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-            lng += dlng;
-
-            coordinates.add(new Coordinate(lat / 1E5, lng / 1E5));
+        for (LatLng point : decodedPoints) {
+            String latStr = new BigDecimal(point.lat).setScale(7, RoundingMode.HALF_UP).toPlainString();
+            String lonStr = new BigDecimal(point.lng).setScale(7, RoundingMode.HALF_UP).toPlainString();
+            coordinates.add(new Coordinate(latStr, lonStr));
         }
+
         return coordinates;
     }
 
-    // New method: decode and interpolate points every stepMeters
+    /**
+     * Decodes polyline and adds interpolated points every `stepMeters`.
+     */
     public static List<Coordinate> decodeWithInterpolation(String polyline, double stepMeters) {
-        List<Coordinate> decoded = decode(polyline);
-        List<Coordinate> result = new ArrayList<>();
-        if (decoded.isEmpty()) return result;
+        List<Coordinate> originalPoints = decode(polyline);
+        List<Coordinate> interpolated = new ArrayList<>();
 
-        for (int i = 0; i < decoded.size() - 1; i++) {
-            Coordinate start = decoded.get(i);
-            Coordinate end = decoded.get(i + 1);
-            result.add(start);
+        for (int i = 0; i < originalPoints.size() - 1; i++) {
+            Coordinate start = originalPoints.get(i);
+            Coordinate end = originalPoints.get(i + 1);
 
-            double distance = haversine(start.getLat(), start.getLon(), end.getLat(), end.getLon());
-            int steps = (int) (distance / stepMeters);
+            double lat1 = Double.parseDouble(start.getLat());
+            double lon1 = Double.parseDouble(start.getLon());
+            double lat2 = Double.parseDouble(end.getLat());
+            double lon2 = Double.parseDouble(end.getLon());
 
-            for (int s = 1; s < steps; s++) {
-                double fraction = (double) s / steps;
-                double lat = start.getLat() + (end.getLat() - start.getLat()) * fraction;
-                double lon = start.getLon() + (end.getLon() - start.getLon()) * fraction;
-                result.add(new Coordinate(lat, lon));
+            interpolated.add(start); // Always include the start point
+
+            double distance = haversine(lat1, lon1, lat2, lon2);
+            int steps = (int) Math.floor(distance / stepMeters);
+
+            for (int step = 1; step < steps; step++) {
+                double fraction = (double) step / steps;
+                double interpLat = lat1 + (lat2 - lat1) * fraction;
+                double interpLon = lon1 + (lon2 - lon1) * fraction;
+
+                String latStr = new BigDecimal(interpLat).setScale(7, RoundingMode.HALF_UP).toPlainString();
+                String lonStr = new BigDecimal(interpLon).setScale(7, RoundingMode.HALF_UP).toPlainString();
+
+                interpolated.add(new Coordinate(latStr, lonStr));
             }
         }
-        result.add(decoded.get(decoded.size() - 1));
-        return result;
+
+        if (!originalPoints.isEmpty()) {
+            interpolated.add(originalPoints.get(originalPoints.size() - 1)); // add the last point
+        }
+
+        return interpolated;
     }
 
-    // Haversine formula in meters
+    /**
+     * Computes Haversine distance in meters between two lat/lon points.
+     */
     private static double haversine(double lat1, double lon1, double lat2, double lon2) {
-        final int R = 6371000;
+        final int R = 6371000; // Earth radius in meters
         double dLat = Math.toRadians(lat2 - lat1);
         double dLon = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 }

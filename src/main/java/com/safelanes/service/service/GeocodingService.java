@@ -21,6 +21,12 @@ public class GeocodingService {
                 .getJSONObject(0)
                 .getJSONObject("geometry")
                 .getJSONObject("location");
-        return new Coordinate(location.getDouble("lat"), location.getDouble("lng"));
+
+        double lat = location.getDouble("lat");
+        double lng = location.getDouble("lng");
+        String latStr = String.format("%.7f", lat);
+        String lngStr = String.format("%.7f", lng);
+
+        return new Coordinate(latStr, lngStr);
     }
 }

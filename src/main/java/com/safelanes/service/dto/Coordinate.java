@@ -1,14 +1,18 @@
 package com.safelanes.service.dto;
 
 public class Coordinate {
-    private double lat;
-    private double lon;
+    private String lat;
+    private String lon;
 
-    public Coordinate(double lat, double lon) {
+    public Coordinate(String lat, String lon) {
         this.lat = lat;
         this.lon = lon;
     }
 
-    public double getLat() { return lat; }
-    public double getLon() { return lon; }
+    public String getLat() { return lat; }
+    public String getLon() { return lon; }
+    @Override
+    public String toString() {
+        return "Coordinate{lat=" + lat + ", lon=" + lon + "}";
+    }
 }

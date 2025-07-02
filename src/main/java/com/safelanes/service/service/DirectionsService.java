@@ -28,32 +28,44 @@ public class DirectionsService {
 
     public List<ScoredCoordinate> getWalkingPath(Coordinate src, Coordinate dest) {
         RestTemplate restTemplate = new RestTemplate();
-        String url = String.format("%s?origin=%f,%f&destination=%f,%f&mode=walking&alternatives=true&key=%s",
+        String url = String.format("%s?origin=%s,%s&destination=%s,%s&mode=walking&alternatives=true&key=%s",
                 DIRECTIONS_URL, src.getLat(), src.getLon(), dest.getLat(), dest.getLon(), API_KEY);
+
         String response = restTemplate.getForObject(url, String.class);
         JSONObject json = new JSONObject(response);
         List<PathResponse> pathResponses = new ArrayList<>();
+
         if (json.getString("status").equals("OK")) {
             JSONArray routes = json.getJSONArray("routes");
             for (int i = 0; i < routes.length(); i++) {
                 JSONObject route = routes.getJSONObject(i);
                 String polyline = route.getJSONObject("overview_polyline").getString("points");
-                List<Coordinate> coordinates = PolylineDecoder.decodeWithInterpolation(polyline,10);
+
+                List<Coordinate> coordinates = PolylineDecoder.decodeWithInterpolation(polyline, 5.0);
+                System.out.println("Route " + (i + 1) + ": " + coordinates.size() + " points");
+
+                // Print first and last coordinates of each route
+                if (!coordinates.isEmpty()) {
+                    Coordinate start = coordinates.get(0);
+                    Coordinate end = coordinates.get(coordinates.size() - 1);
+                    System.out.println("  Start: (" + start.getLat() + ", " + start.getLon() + ")");
+                    System.out.println("  End: (" + end.getLat() + ", " + end.getLon() + ")");
+                    System.out.println();
+                }
+
                 pathResponses.add(new PathResponse(coordinates));
             }
         }
+
         lastScoredPaths = scoringService.scorePaths(pathResponses);
 
-        // Ensure lastScoredPaths is not empty
         if (lastScoredPaths == null || lastScoredPaths.isEmpty()) {
             return new ArrayList<>();
         }
 
-        // If only one path, return it; otherwise, find the safest path
-        if (lastScoredPaths.size() == 1) {
-            return lastScoredPaths.get(0);
-        } else {
-            return safePathService.findSafestPath(lastScoredPaths);
-        }
+        return (lastScoredPaths.size() == 1)
+                ? lastScoredPaths.get(0)
+                : safePathService.findSafestPath(lastScoredPaths);
     }
+
 }

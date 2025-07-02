@@ -12,4 +12,13 @@ public class PathResponse {
     public List<Coordinate> getCoordinates() {
         return coordinates;
     }
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("PathResponse{coordinates=[");
+        for (Coordinate coord : coordinates) {
+            sb.append(coord.toString()).append(", ");
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
 }
