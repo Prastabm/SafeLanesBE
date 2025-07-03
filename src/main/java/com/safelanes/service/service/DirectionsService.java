@@ -6,6 +6,7 @@ import com.safelanes.service.dto.ScoredCoordinate;
 import com.safelanes.service.service.PolylineDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.json.JSONObject;
@@ -26,6 +27,7 @@ public class DirectionsService {
     private SafePathService safePathService;
     private List<List<ScoredCoordinate>> lastScoredPaths = new ArrayList<>();
 
+    @Cacheable(value = "safestPaths", keyGenerator = "customKeyGenerator")
     public List<ScoredCoordinate> getWalkingPath(Coordinate src, Coordinate dest) {
         RestTemplate restTemplate = new RestTemplate();
         String url = String.format("%s?origin=%s,%s&destination=%s,%s&mode=walking&alternatives=true&key=%s",

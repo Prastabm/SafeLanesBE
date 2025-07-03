@@ -1,9 +1,36 @@
+version: '3.8'
+
 services:
-  postgres:
-    image: 'postgres:latest'
-    environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - '5432'
+      - "8085:8085"  # Changed to match application.properties
+    environment:
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_TIMEOUT=2000
+      - SERVER_PORT=8085  # Explicitly set server port
+    depends_on:
+      - redis
+    networks:
+      - safelanes-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - safelanes-network
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+networks:
+  safelanes-network:
+    driver: bridge
+
+volumes:
+  redis-data:

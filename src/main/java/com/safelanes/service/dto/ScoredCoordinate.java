@@ -1,6 +1,9 @@
 package com.safelanes.service.dto;
 
-public class ScoredCoordinate {
+import java.io.Serializable;
+
+public class ScoredCoordinate implements Serializable {
+    private static final long serialVersionUID = 1L;
     private double lat;
     private double lon;
     private double score;
