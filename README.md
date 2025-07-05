@@ -47,13 +47,12 @@
 # Tasks Before Demo of Prototype V0
 - [x] H3 Clustering for Crime Hotspots
 - [x] Model Training for Coordinate Safety Scores (XGBOOST)
-- [ ] Kafka Message Streaming Setup Between SpringBoot and Flask Service
 - [x] GMaps API setup with billing
 - [x] Springboot endpoint creation
 - [ ] Setting up the auth server and api gateway
-- [ ] Setting up Redis caching for reduced API calls
+- [x] Setting up Redis caching for reduced API calls
 - [x] Running the entire application in a Docker environment
-- [ ] testing functionalities
+- [x] testing functionalities
 # Screenshots of Progress
 > **_1. Hotspot Clusters Across City Of Boston_**
 
@@ -294,5 +293,11 @@ Prediction Confidence: 100.00%
 
 Process finished with exit code 0
 ```
+> **_3: Mapping interface_**
+
+
+
+![WhatsApp Image 2025-07-04 at 13.06.14.jpeg](https://eraser.imgix.net/workspaces/3FgYgwGWKTds9smuJX7X/7b5Aq6I5FSgyoprGLWNt8lT5n7n1/yxN5t6IcKWH3RNEjhyPl7.jpg?ixlib=js-3.7.0 "WhatsApp Image 2025-07-04 at 13.06.14.jpeg")
+
 
 
