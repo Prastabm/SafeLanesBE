@@ -12,8 +12,8 @@ public class CustomKeyConfig {
         return (target, method, params) -> {
             Coordinate source = (Coordinate) params[0];
             Coordinate destination = (Coordinate) params[1];
-            return "[(" + source.getLat() + "," + source.getLon() + ")-(" +
-                    destination.getLat() + "," + destination.getLon() + ")]";
+            return "[(" + source.getLat() + "," + source.getLng() + ")-(" +
+                    destination.getLat() + "," + destination.getLng() + ")]";
         };
     }
 }

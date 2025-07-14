@@ -8,13 +8,13 @@ import java.util.*;
 public class SafePathService {
 
     static class Node {
-        double lat, lon, score;
+        double lat, lng, score;
         double totalScore = Double.NEGATIVE_INFINITY;
         Node parent;
 
-        Node(double lat, double lon, double score) {
+        Node(double lat, double lng, double score) {
             this.lat = lat;
-            this.lon = lon;
+            this.lng = lng;
             this.score = score;
         }
 
@@ -22,17 +22,17 @@ public class SafePathService {
         public boolean equals(Object obj) {
             if (!(obj instanceof Node)) return false;
             Node other = (Node) obj;
-            return Double.compare(lat, other.lat) == 0 && Double.compare(lon, other.lon) == 0;
+            return Double.compare(lat, other.lat) == 0 && Double.compare(lng, other.lng) == 0;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(lat, lon);
+            return Objects.hash(lat, lng);
         }
     }
 
     private static double distance(Node a, Node b) {
-        return Math.sqrt(Math.pow(a.lat - b.lat, 2) + Math.pow(a.lon - b.lon, 2));
+        return Math.sqrt(Math.pow(a.lat - b.lat, 2) + Math.pow(a.lng - b.lng, 2));
     }
 
     private static List<Node> getNeighbors(Node current, List<Node> nodes) {
@@ -99,7 +99,7 @@ public class SafePathService {
         for (Node n : nodes) {
             ScoredCoordinate sc = new ScoredCoordinate();
             sc.setLat(n.lat);
-            sc.setLon(n.lon);
+            sc.setLng(n.lng);
             sc.setScore(n.score);
             result.add(sc);
         }

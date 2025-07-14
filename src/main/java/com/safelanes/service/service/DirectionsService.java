@@ -31,7 +31,7 @@ public class DirectionsService {
     public List<ScoredCoordinate> getWalkingPath(Coordinate src, Coordinate dest) {
         RestTemplate restTemplate = new RestTemplate();
         String url = String.format("%s?origin=%s,%s&destination=%s,%s&mode=walking&alternatives=true&key=%s",
-                DIRECTIONS_URL, src.getLat(), src.getLon(), dest.getLat(), dest.getLon(), API_KEY);
+                DIRECTIONS_URL, src.getLat(), src.getLng(), dest.getLat(), dest.getLng(), API_KEY);
 
         String response = restTemplate.getForObject(url, String.class);
         JSONObject json = new JSONObject(response);
@@ -50,8 +50,8 @@ public class DirectionsService {
                 if (!coordinates.isEmpty()) {
                     Coordinate start = coordinates.get(0);
                     Coordinate end = coordinates.get(coordinates.size() - 1);
-                    System.out.println("  Start: (" + start.getLat() + ", " + start.getLon() + ")");
-                    System.out.println("  End: (" + end.getLat() + ", " + end.getLon() + ")");
+                    System.out.println("  Start: (" + start.getLat() + ", " + start.getLng() + ")");
+                    System.out.println("  End: (" + end.getLat() + ", " + end.getLng() + ")");
                     System.out.println();
                 }
 

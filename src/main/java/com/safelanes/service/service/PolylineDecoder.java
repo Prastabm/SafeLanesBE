@@ -20,8 +20,8 @@ public class PolylineDecoder {
 
         for (LatLng point : decodedPoints) {
             String latStr = new BigDecimal(point.lat).setScale(7, RoundingMode.HALF_UP).toPlainString();
-            String lonStr = new BigDecimal(point.lng).setScale(7, RoundingMode.HALF_UP).toPlainString();
-            coordinates.add(new Coordinate(latStr, lonStr));
+            String lngStr = new BigDecimal(point.lng).setScale(7, RoundingMode.HALF_UP).toPlainString();
+            coordinates.add(new Coordinate(latStr, lngStr));
         }
 
         return coordinates;
@@ -39,24 +39,24 @@ public class PolylineDecoder {
             Coordinate end = originalPoints.get(i + 1);
 
             double lat1 = Double.parseDouble(start.getLat());
-            double lon1 = Double.parseDouble(start.getLon());
+            double lng1 = Double.parseDouble(start.getLng());
             double lat2 = Double.parseDouble(end.getLat());
-            double lon2 = Double.parseDouble(end.getLon());
+            double lng2 = Double.parseDouble(end.getLng());
 
             interpolated.add(start); // Always include the start point
 
-            double distance = haversine(lat1, lon1, lat2, lon2);
+            double distance = haversine(lat1, lng1, lat2, lng2);
             int steps = (int) Math.floor(distance / stepMeters);
 
             for (int step = 1; step < steps; step++) {
                 double fraction = (double) step / steps;
                 double interpLat = lat1 + (lat2 - lat1) * fraction;
-                double interpLon = lon1 + (lon2 - lon1) * fraction;
+                double interplng = lng1 + (lng2 - lng1) * fraction;
 
                 String latStr = new BigDecimal(interpLat).setScale(7, RoundingMode.HALF_UP).toPlainString();
-                String lonStr = new BigDecimal(interpLon).setScale(7, RoundingMode.HALF_UP).toPlainString();
+                String lngStr = new BigDecimal(interplng).setScale(7, RoundingMode.HALF_UP).toPlainString();
 
-                interpolated.add(new Coordinate(latStr, lonStr));
+                interpolated.add(new Coordinate(latStr, lngStr));
             }
         }
 
@@ -68,16 +68,16 @@ public class PolylineDecoder {
     }
 
     /**
-     * Computes Haversine distance in meters between two lat/lon points.
+     * Computes Haversine distance in meters between two lat/lng points.
      */
-    private static double haversine(double lat1, double lon1, double lat2, double lon2) {
+    private static double haversine(double lat1, double lng1, double lat2, double lng2) {
         final int R = 6371000; // Earth radius in meters
         double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(lon2 - lon1);
+        double dlng = Math.toRadians(lng2 - lng1);
 
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
                 + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                * Math.sin(dlng / 2) * Math.sin(dlng / 2);
 
         return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
